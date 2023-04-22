@@ -2,7 +2,7 @@ const db_d = require("./components/SeoArticle/Database_datico");
 const db_f = require("./components/SeoArticle/Database_freud");
 const create = require("./components/SeoArticle/SeoArticleCreate");
 const words_y = require("./components/SeoArticle/Wordstat_yandex");
-const words_g = require("./components/SeoArticle/Wordstat_google");
+// const words_g = require("./components/SeoArticle/Wordstat_google");
 
 async function runTasks() {
   const tasks = await db_d.tasksGetAll();
@@ -30,7 +30,7 @@ async function runTasks() {
     console.log(`Execution time: ${executionTime} seconds`);
   }
 }
-// runTasks();
+runTasks();
 
 async function updateHtml() {
   const urls = await db_d.urlGetAll();
@@ -49,6 +49,7 @@ async function updateHtml() {
       seo.main_prompt
     );
     const update = await db_f.updateHtml(articleId, html);
+    const update_datico = await db_d.updateHtml(articleId, '_', seo.article_text);
     console.log(`${update.affectedRows} record updated for url: ${url}`);
   }
 }

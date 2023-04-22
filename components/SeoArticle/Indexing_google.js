@@ -1,8 +1,8 @@
 const { google } = require("googleapis");
 const auth = new google.auth.GoogleAuth({
   projectId: "freud-online",
-  keyFile: "./freud-online-9ce1f75d5d28.json",
-  scopes: ["https://www.googleapis.com/auth/adwords"],
+  keyFile: "./freud-online-1d405901c901.json",
+  scopes: ["https://www.googleapis.com/auth/indexing"],
 });
 
 
@@ -36,7 +36,15 @@ async function publishUrlForIndexing(url, type) {
 // Example: submit a URL for indexing
 const url = "https://freud.online/types/ear/analysis";
 const type = "URL_UPDATED"; //or URL_DELETED
-// publishUrlForIndexing(url, type);
+async function main() {
+  try {
+    const res = await publishUrlForIndexing(url, type);
+    console.log(res);
+  } catch (error) {
+    console.error(error);
+  }
+}
+// main();
 
 module.exports = {
   publishUrlForIndexing,

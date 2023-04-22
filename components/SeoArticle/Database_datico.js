@@ -44,8 +44,8 @@ async function urlDelete(url) {
 
 async function urlCreate(seoObject) {
   const sql = `
-  INSERT INTO datico.seo_shorts (seo_url, main_prompt, main_url, seo_prompt, image_prompt, image_thumb, image_og, article_id, article_desc, article_text)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO datico.seo_shorts (seo_url, main_prompt, main_url, seo_prompt, image_prompt, image_thumb, image_og, article_id, article_text)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   const values = [
     seoObject.seo_url,
@@ -56,7 +56,6 @@ async function urlCreate(seoObject) {
     seoObject.image_thumb,
     seoObject.image_og,
     seoObject.article_id,
-    seoObject.article_desc,
     seoObject.article_text,
   ];
   try {
@@ -84,7 +83,8 @@ async function tasksGetAll() {
 
 async function urlGetAll() {
   const sql = `
-  SELECT * FROM datico.seo_shorts;
+  SELECT * FROM seo_shorts
+  WHERE article_desc LIKE '\n%'
   `;
   try {
     const [result] = await pool.execute(sql);
@@ -99,9 +99,7 @@ async function tasksDeleteDone(id) {
   const sql = `
   DELETE FROM datico.seo_shorts_tasks WHERE id=?
   `;
-  const values = [
-    id
-  ];
+  const values = [id];
   try {
     const [result] = await pool.execute(sql, values);
     console.log(`Seo task with ID ${id} deleted`);
@@ -113,6 +111,19 @@ async function tasksDeleteDone(id) {
   }
 }
 
+async function updateHtml(articleId, articleDesc, articleText) {
+  const sql = `
+  UPDATE datico.seo_shorts 
+  SET 
+  \`article_desc\` = ?,
+  \`article_text\` = ?
+  WHERE article_id = ?;
+  `;
+  const values = [articleDesc, articleText, articleId];
+  const [result] = await pool.execute(sql, values);
+  return result;
+}
+
 module.exports = {
   urlCheck,
   promptCheck,
@@ -121,4 +132,5 @@ module.exports = {
   urlGetAll,
   tasksGetAll,
   tasksDeleteDone,
+  updateHtml,
 };

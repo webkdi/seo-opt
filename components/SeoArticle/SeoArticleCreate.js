@@ -33,7 +33,6 @@ var PATH_IMAGE_OG_SERVER = `/www/freud.online/images/projects/apps/shorts/narcis
 var PATH_IMAGE_THUMB = `C:\Users\Dimitri\Apps\SeoOpt\images\narcissicheskij-tip-lichnosti-primery-iz-filmov-thumb.jpg`;
 var PATH_IMAGE_THUMB_SERVER = `/www/freud.online/images/projects/apps/shorts/narcissicheskij-tip-lichnosti-primery-iz-filmov-thumb.jpg`;
 var PATH_IMAGE_SERVER_FOLDER = "/www/freud.online/images/projects/apps/shorts/";
-var TEXT_DESC = `Узнайте, что такое нарциссический тип личности и как он проявляется в кино. В статье приведены примеры из популярных фильмов, которые помогут понять этот психологический феномен.`;
 var TEXT_ARTICLE = `Нарциссический тип личности: примеры из фильмов
 
 Нарциссизм – это сочетание высокой самооценки и недостаточной эмпатии. Люди с таким типом личности обладают чрезмерным желанием внимания и похвал, а также склонностью к манипуляции окружающими. Давайте рассмотрим несколько примеров нарциссического поведения из фильмов.
@@ -106,7 +105,7 @@ async function translateText(input) {
   // Create a new instance of the Translate API client
   const translate = new Translate({
     projectId: "freud-online",
-    keyFilename: "./freud-online-9ce1f75d5d28.json",
+    keyFilename: "./freud-online-1d405901c901.json",
   });
   const targetLanguage = "en";
 
@@ -267,13 +266,9 @@ const getImages = async (prompt, fileName) => {
   return output;
 };
 
-const getOpenAiText = async (prompt, task) => {
+const getOpenAiText = async (prompt) => {
   let content = "";
-  if (task == 1) {
-    content = `Действуй как SEO специалист, продвигающий статьи в топ поисковиков Yandex и Google. Составь короткое описание статьи по поисковому запросу: "${prompt}" для og:description. Описание не должно превышать 150 печатных знаков. В случае неясности, к какой сфере относится запрос, всегда выбирай сферу "психология". Не нужно в начале повторять задание или предисловие. Не вставляй описание в кавычки.`;
-  } else {
-    content = `Действуй как SEO специалист, продвигающий статьи в топ поисковиков Yandex и Google. Напиши статью в 300-500 знаков, состоящую из 3 абзацев, по поисковому запросу: "${prompt}". Каждое из слов поискового запроса должно встречаться в статье не менее 3 раз. Начинай сразу со статьи. Не нужно в начале повторять поисковый запрос. Не нужно писать заголовок. В случае неясности, к какой сфере относится запрос, всегда выбирай сферу "психология".`;
-  }
+  content = `Действуй как SEO специалист, продвигающий статьи в топ поисковиков Yandex и Google. Напиши статью в 300-500 знаков, состоящую из 3 абзацев, по поисковому запросу: "${prompt}". Каждое из слов поискового запроса должно встречаться в статье не менее 3 раз. Начинай сразу со статьи. Не нужно в начале повторять поисковый запрос. Не нужно писать заголовок. В случае неясности, к какой сфере относится запрос, всегда выбирай сферу "психология".`;
 
   const messagePrompt = [
     {
@@ -298,7 +293,6 @@ const getOpenAiText = async (prompt, task) => {
     const response = await openai.createChatCompletion(params);
     const text = response.data.choices[0].message.content;
     return text;
-    // console.log('response', response.data.choices[0].message.content);
   } catch (error) {
     console.error(
       `An error occurred while executing the OpenAI API: ${error.message}`
@@ -391,8 +385,9 @@ const createMainHtml = async (
     "
   >
     <div id="image_here" itemscope="" itemtype="http://schema.org/ImageObject">
-      <a href="types/ear/analysis"
+      <a href="${mainUrl}"
         ><img
+          id="shake-image"
           src="${convertFtpPathToHttpsUrl(pathImageThumbServer)}" 
           alt="${promptRus}"
           width="120"
@@ -423,6 +418,25 @@ const createMainHtml = async (
   </div>
   `;
 
+  const animation_script = `
+  <script>
+  const img = document.getElementById('shake-image');
+  
+  // Define the pulsating animation function
+  function pulse() {
+    img.style.transform = 'scale(1.05)';
+    setTimeout(() => {
+      img.style.transform = 'scale(1)';
+    }, 200);
+  }
+  
+  // Call the pulse function for both the image and the button every 1000ms
+    setInterval(() => {
+      pulse(img);
+    }, 2000);
+  </script>
+  `;
+
   //remove newline in beginning
   const textNoNewline = textArticle.trimStart();
   // const textFinal = textNoNewline.replace(/\n\n/g, "</p><p>");
@@ -451,6 +465,10 @@ const createMainHtml = async (
   formattedParagraphs.push(read_more_button);
   // Add heading section at the beginning
   // formattedParagraphs.unshift(`<h1>${promptRus}</h1>`);
+
+  //Add animation script
+  formattedParagraphs.push(animation_script);
+  
   // Join formatted paragraphs into a single string
   const TEXT_ARTICLE = formattedParagraphs.join("");
 
@@ -487,6 +505,7 @@ async function executeSteps(mainPrompt, mainUrl, seoPrompt) {
     URL_ALIAS = await friendlyUrl(PROMPT_RUS);
     console.log("Переводим текст");
     PROMPT_ENG = await translateText(PROMPT_RUS);
+    PROMPT_ENG += ",psychology, positive mood,";
     console.log("Ищем затравку для картинок");
     PROMPT_IMAGE = await getImagePrompt(PROMPT_ENG);
 
@@ -502,11 +521,9 @@ async function executeSteps(mainPrompt, mainUrl, seoPrompt) {
       return;
     }
 
-    // console.log("Ищем короткое описание");
-    // TEXT_DESC = await getOpenAiText(PROMPT_RUS, 1);
     console.log("Ищем текст статьи");
     try {
-      TEXT_ARTICLE = await getOpenAiText(PROMPT_RUS, 2);
+      TEXT_ARTICLE = await getOpenAiText(PROMPT_RUS);
     } catch (error) {
       console.error(
         `An error occurred while getting the text: ${error.message}`
@@ -524,6 +541,9 @@ async function executeSteps(mainPrompt, mainUrl, seoPrompt) {
       PATH_IMAGE_OG_SERVER
     );
 
+    // console.log('Break');
+    // await sleep(10000); // Wait for 5 seconds
+
     const seoObject = {
       main_url: MAIN_URL,
       main_prompt: MAIN_PROMPT,
@@ -533,14 +553,13 @@ async function executeSteps(mainPrompt, mainUrl, seoPrompt) {
       image_thumb: PATH_IMAGE_THUMB_SERVER,
       image_og: PATH_IMAGE_OG_SERVER,
       article_id: ARTICLE_ID,
-      article_desc: TEXT_DESC,
       article_text: TEXT_ARTICLE,
     };
     console.log("Сохраняем все данные в рабочую таблицу");
     await storeSeoUlr(seoObject);
+
     console.log("Индексируем в Гугле и Яндексе");
     (async () => {
-      // try {
       const url_indexing = "https://freud.online/shorts/" + URL_ALIAS;
       const indexGoogle = await index_google.publishUrlForIndexing(
         url_indexing,
@@ -550,22 +569,19 @@ async function executeSteps(mainPrompt, mainUrl, seoPrompt) {
       const indexYandex = await index_yandex.publishUrlForIndexing(
         url_indexing
       );
-      console.log("Все сделано!");
-      // } catch (error) {
-      //   console.error(error);
-      // }
+      
     })();
 
-    // const url_indexing = "https://freud.online/shorts/" + URL_ALIAS;
-    // const indexGoogle = await index_google.publishUrlForIndexing(
-    //   url_indexing,
-    //   "URL_UPDATED"
-    // );
-    // console.log(indexGoogle);
-    // console.log("Все сделано!");
+    console.log(`Все сделано для https://freud.online/shorts/${URL_ALIAS}`);
+
   } catch (error) {
     throw error;
   }
+}
+
+//pause for monitoring
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 module.exports = {

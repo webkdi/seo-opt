@@ -64,10 +64,12 @@ async function urlCreate(article) {
 async function updateHtml(id, html) {
   const sql = `
   UPDATE freud.main_content 
-  SET \`fulltext\` = ?
+  SET 
+  \`introtext\` = ?,
+  \`fulltext\` = ?
   WHERE id = ?;
   `;
-  const values = [html, id];
+  const values = [html.TEXT_DESC, html.TEXT_ARTICLE, id];
   const [result] = await pool.execute(sql, values);
   return result;
 }
