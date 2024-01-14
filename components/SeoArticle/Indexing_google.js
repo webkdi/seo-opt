@@ -5,7 +5,6 @@ const auth = new google.auth.GoogleAuth({
   scopes: ["https://www.googleapis.com/auth/indexing"],
 });
 
-
 const indexing = google.indexing({
   version: "v3",
   auth: auth,

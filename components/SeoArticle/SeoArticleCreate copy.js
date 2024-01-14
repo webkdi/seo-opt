@@ -143,10 +143,9 @@ const getImageFromChatGPT = async (prompt) => {
         Authorization: `Bearer ${process.env.CHATGPT_API_KEY}`,
       },
       data: {
-        // model: "image-alpha-001",
+        model: "image-alpha-001",
         prompt: prompt,
-        // num_images: 1,
-        n: 1, 
+        num_images: 1,
         size: "512x512",
         response_format: "url",
       },
@@ -403,19 +402,19 @@ const createMainHtml = async (
     </p>
     <h1 style="margin-top: 0px; margin-bottom: 0px; line-height: 100%;">${promptRus}</h1>
     <p style="margin-top: 0px;">
-      Если Вы хотите пройти супервизию, здесь вы можете зарегистрироваться или узнать детали:
+      Полную, всеобемлющую информацию читайте в статье
       <a href="${mainUrl}">"${mainPrompt}"</a>
     </p>
-    <p style="margin-bottom: 0px;"><a href="${mainUrl}"><strong>ЗАПИСАТЬСЯ НА СУПЕРВИЗИЮ &gt;&gt;&gt;</strong></a></p>
+    <p style="margin-bottom: 0px;"><a href="${mainUrl}"><strong>ЧИТАТЬ ПОЛНУЮ СТАТЬЮ &gt;&gt;&gt;</strong></a></p>
   </div>
   `;
   const read_more_button = `
-  <div id="read_more_line" style="overflow: hidden; background-color: rgba(55, 145, 55, 0.2); padding: 8px; border-radius: 4px; margin-bottom: 8px;">Записаться или узнать детали о супервизии вы можете в разделе <a href="${mainUrl}">"${mainPrompt}"</a></div>
+  <div id="read_more_line" style="overflow: hidden; background-color: rgba(55, 145, 55, 0.2); padding: 8px; border-radius: 4px; margin-bottom: 8px;">Продолжение - в статье <a href="${mainUrl}">"${mainPrompt}"</a></div>
   <div class="centering">
     <button 
       onclick="location.href='${mainUrl}'" 
       class="dima-button-bitrix"
-    >Записаться на супервизию или спросить</button>
+    >Узнать больше и детальнее</button>
   </div>
   `;
 

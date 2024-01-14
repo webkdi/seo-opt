@@ -84,7 +84,6 @@ async function tasksGetAll() {
 async function urlGetAll() {
   const sql = `
   SELECT * FROM seo_shorts
-  WHERE article_desc LIKE '\n%'
   `;
   try {
     const [result] = await pool.execute(sql);

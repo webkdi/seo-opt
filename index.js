@@ -3,6 +3,7 @@ const db_f = require("./components/SeoArticle/Database_freud");
 const create = require("./components/SeoArticle/SeoArticleCreate");
 const words_y = require("./components/SeoArticle/Wordstat_yandex");
 // const words_g = require("./components/SeoArticle/Wordstat_google");
+// const people = require("./components/SeoArticle/google_people_api");
 
 async function runTasks() {
   const tasks = await db_d.tasksGetAll();
@@ -30,7 +31,8 @@ async function runTasks() {
     console.log(`Execution time: ${executionTime} seconds`);
   }
 }
-runTasks();
+//основная процедура
+// runTasks();
 
 async function updateHtml() {
   const urls = await db_d.urlGetAll();
@@ -49,7 +51,7 @@ async function updateHtml() {
       seo.main_prompt
     );
     const update = await db_f.updateHtml(articleId, html);
-    const update_datico = await db_d.updateHtml(articleId, '_', seo.article_text);
+    // const update_datico = await db_d.updateHtml(articleId, '_', seo.article_text);
     console.log(`${update.affectedRows} record updated for url: ${url}`);
   }
 }
@@ -85,3 +87,31 @@ async function getWords() {
   const words = await words_y.CreateNewWordstatReport();
 }
 // getWords();
+
+
+async function updateArticlesMetaDesc() {
+  let articles = await db_f.getArticlesWoMetadesc();
+  articles = articles.slice(0, 2);
+  for (const article of articles) {
+    const regex = /(<([^>]+)>)/ig;
+    let newMeta = article.introtext.replace(regex, "");
+    newMeta = newMeta.replace(/&nbsp;/g, ' ').replace(/\r?\n|\r/g, ' ').trim();
+    const lg = newMeta.length;
+    if (lg > 300) {
+      let lastSpaceIndex = newMeta.lastIndexOf(' ', 296);
+      newMeta = newMeta.substring(0, lastSpaceIndex) + ' ...';
+    } else if (lg < 30) { 
+      console.log("id:", article.id, "link:",`https://freud.online/articles/${article.alias}`);
+      console.log(article,"\n");
+      continue; 
+    }
+    const updateDesc = await db_f.updateArticleMedaDesc(article.id, newMeta)
+
+    // console.log(`"${article.introtext}"`);
+    // console.log(`"${newMeta}"`);
+    console.log("id:", article.id, "link:",`https://freud.online/articles/${article.alias}`);
+    console.log(newMeta,"\n");
+
+  }
+}
+// updateArticlesMetaDesc();

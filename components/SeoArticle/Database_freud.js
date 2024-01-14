@@ -31,9 +31,11 @@ async function urlDelete(url) {
 }
 
 async function urlCreate(article) {
+
+  const metadesc = article.introtext.substr(0, 160) + '...';
   const sql = `
-  INSERT INTO main_content (title, alias, introtext, \`fulltext\`, images, state, access, catid, created_by, created, publish_up, publish_down)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO main_content (title, alias, introtext, \`fulltext\`, images, state, access, catid, created_by, created, publish_up, publish_down, metadesc)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
   `;
 
   const values = [
@@ -49,6 +51,7 @@ async function urlCreate(article) {
     article.created,
     article.publish_up,
     article.publish_down,
+    metadesc,
   ];
 
   try {
@@ -57,7 +60,7 @@ async function urlCreate(article) {
     return result.insertId;
   } catch (error) {
     console.log(error.sqlMessage);
-    return 0;
+    throw new Error("An error has occurred in urlCreate!");
   }
 }
 
@@ -74,9 +77,50 @@ async function updateHtml(id, html) {
   return result;
 }
 
+async function getArticlesWoMetadesc() {
+  const sql = `
+  SELECT id, title, alias, introtext, metadesc
+  FROM freud.main_content
+  WHERE catid=142 AND metadesc = ''  
+  `;
+  // const sql = `
+  // SELECT id, title, alias, introtext, metadesc
+  // FROM freud.main_content
+  // WHERE metadesc = ''  
+  // `;
+  try {
+    const [result] = await pool.execute(sql);
+    return result;
+  } catch (error) {
+    console.log(error.sqlMessage);
+    throw new Error("An error has occurred in getArticlesWoMetadesc!");
+  }
+}
+
+async function updateArticleMedaDesc(id, metadesc) {
+  const sql = `
+  UPDATE freud.main_content
+  SET metadesc=?
+  WHERE id=?  
+  `;
+  const values = [metadesc, id];
+  try {
+    const [result] = await pool.execute(sql, values);
+    // console.log(`Article with ID: ${id} updated`);
+    // console.log(result);
+    return result.affectedRows;
+  } catch (error) {
+    console.log(error.sqlMessage);
+    throw new Error("An error has occurred in updateArticleMedaDesc!");
+  }
+}
+
+
 module.exports = {
   urlCheck,
   urlDelete,
   urlCreate,
   updateHtml,
+  getArticlesWoMetadesc,
+  updateArticleMedaDesc,
 };
